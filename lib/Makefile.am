@@ -18,7 +18,7 @@
 #
 # For more info see section 6.3 of the GNU Libtool Manual.
 
-VERINFO = -version-info 13:0:2
+VERINFO = -version-info 15:0:0
 
 ## Flex
 PARSER_PREFIX = libconfig_yy
@@ -26,7 +26,6 @@ AM_LFLAGS = --header-file=scanner.h --prefix=$(PARSER_PREFIX)
 
 ## Bison
 AM_YFLAGS = -d -p $(PARSER_PREFIX)
-
 
 libsrc = grammar.y libconfig.c parsectx.h scanctx.c scanctx.h scanner.l \
     strbuf.c strbuf.h strvec.c strvec.h util.c util.h wincompat.c wincompat.h
@@ -37,6 +36,8 @@ libinc_cpp =  libconfig.h++
 
 BUILT_SOURCES = scanner.c scanner.h grammar.c grammar.h
 
+scanner.h: scanner.c
+	@if test ! -f $@; then rm -f scanner.c; $(MAKE) $(AM_MAKEFLAGS) scanner.c; else :; fi
 
 ## Build mode: C-only or C & C++
 lib_LTLIBRARIES = libconfig.la
@@ -45,11 +46,8 @@ if BUILDCXX
 lib_LTLIBRARIES += libconfig++.la
 endif
 
-
 libconfig_la_SOURCES = $(libsrc)
-
 libconfig___la_SOURCES = $(libsrc_cpp)
-
 
 libcppflags = -D_REENTRANT
 libcppxxflags = -D_REENTRANT
@@ -57,6 +55,11 @@ libcppxxflags = -D_REENTRANT
 if GNU_WIN
 libcppflags += -DLIBCONFIG_EXPORTS
 libcppxxflags += -DLIBCONFIGXX_EXPORTS -DLIBCONFIG_STATIC
+endif
+
+if ENABLE_ASSERTS
+libcppflags += -DLIBCONFIG_ASSERTS
+libcppxxflags += -DLIBCONFIG_ASSERTS
 endif
 
 libconfig_la_CPPFLAGS = -DPARSER_PREFIX=\"$(PARSER_PREFIX)\" $(libcppflags)
@@ -68,11 +71,8 @@ if BUILDCXX
   include_HEADERS += $(libinc_cpp)
 endif
 
-
 libconfig_la_LDFLAGS = $(VERINFO) -no-undefined
-
 libconfig___la_LDFLAGS = $(VERINFO) -no-undefined
-
 
 EXTRA_DIST = \
 	$(BUILT_SOURCES) \

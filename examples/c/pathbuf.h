@@ -20,28 +20,35 @@
    ----------------------------------------------------------------------------
 */
 
+#ifndef __pathbuf_h
+#define __pathbuf_h
+
 #include <string.h>
-#include <stdint.h>
 #include <sys/types.h>
 
-#define BITS_IN_BYTE 8
+typedef struct
+{
+  char *path;
+  size_t length;
+  size_t capacity;
+} pathbuf_t;
 
-extern void libconfig_set_fatal_error_func(void (*func)(const char *));
+extern pathbuf_t *pathbuf_create(void);
 
-extern void libconfig_fatal_error(const char *message);
+extern void pathbuf_append_path(pathbuf_t *buf, const char *path);
 
-extern void *libconfig_malloc(size_t size);
-extern void *libconfig_calloc(size_t nmemb, size_t size);
-extern void *libconfig_realloc(void *ptr, size_t size);
+extern void pathbuf_append_path_len(pathbuf_t *buf, const char *path, size_t len);
 
-#define __new(T) (T *)libconfig_calloc(1, sizeof(T)) /* zeroed */
-#define __delete(P) free((void *)(P))
-#define __zero(P) memset((void *)(P), 0, sizeof(*P))
+extern void pathbuf_remove_last_component(pathbuf_t *buf);
 
-extern int libconfig_parse_integer(const char *s, int base, long long *val,
-                                   int *is_long);
+#define pathbuf_get_path(BUF) \
+  ((BUF)->path)
 
-extern void libconfig_format_double(double val, int precision, int sci_ok,
-                                    char *buf, size_t buflen);
+#define pathbuf_get_length(BUF) \
+  ((BUF)->length)
 
-extern char *libconfig_format_bin(int64_t val, char *buf);
+extern void pathbuf_clear(pathbuf_t *buf);
+
+extern void pathbuf_destroy(pathbuf_t *buf);
+
+#endif /* __pathbuf_h */

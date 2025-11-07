@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -22,8 +22,7 @@
 
 #include "wincompat.h"
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) \
-  || defined(WIN64) || defined(_WIN64) || defined(__WIN64__)
+#ifdef LIBCONFIG_WINDOWS_OS
 
 #include <errno.h>
 #include <io.h>
@@ -58,4 +57,4 @@ int posix_fsync(int fd)
   return(0);
 }
 
-#endif // WIN32 || WIN64
+#endif /* LIBCONFIG_WINDOWS_OS */

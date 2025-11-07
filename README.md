@@ -1,7 +1,5 @@
-# libconfig - master branch
+# libconfig
+C/C++ library for processing structured configuration files.
 
-This repository contains the frozen state of the repository.
-Its history is cleared. It is used only for static code
-analysis with Codacy.
-
-Commit Time: 1734558700
+Visit the [libconfig project page](https://hyperrealm.github.io/libconfig/)
+for distribution tarballs and other info.

@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.8.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -57,23 +57,27 @@ extern int libconfig_yydebug;
     TOK_BOOLEAN = 258,             /* TOK_BOOLEAN  */
     TOK_INTEGER = 259,             /* TOK_INTEGER  */
     TOK_HEX = 260,                 /* TOK_HEX  */
-    TOK_INTEGER64 = 261,           /* TOK_INTEGER64  */
-    TOK_HEX64 = 262,               /* TOK_HEX64  */
-    TOK_FLOAT = 263,               /* TOK_FLOAT  */
-    TOK_STRING = 264,              /* TOK_STRING  */
-    TOK_NAME = 265,                /* TOK_NAME  */
-    TOK_EQUALS = 266,              /* TOK_EQUALS  */
-    TOK_NEWLINE = 267,             /* TOK_NEWLINE  */
-    TOK_ARRAY_START = 268,         /* TOK_ARRAY_START  */
-    TOK_ARRAY_END = 269,           /* TOK_ARRAY_END  */
-    TOK_LIST_START = 270,          /* TOK_LIST_START  */
-    TOK_LIST_END = 271,            /* TOK_LIST_END  */
-    TOK_COMMA = 272,               /* TOK_COMMA  */
-    TOK_GROUP_START = 273,         /* TOK_GROUP_START  */
-    TOK_GROUP_END = 274,           /* TOK_GROUP_END  */
-    TOK_SEMICOLON = 275,           /* TOK_SEMICOLON  */
-    TOK_GARBAGE = 276,             /* TOK_GARBAGE  */
-    TOK_ERROR = 277                /* TOK_ERROR  */
+    TOK_BIN = 261,                 /* TOK_BIN  */
+    TOK_OCT = 262,                 /* TOK_OCT  */
+    TOK_INTEGER64 = 263,           /* TOK_INTEGER64  */
+    TOK_HEX64 = 264,               /* TOK_HEX64  */
+    TOK_BIN64 = 265,               /* TOK_BIN64  */
+    TOK_OCT64 = 266,               /* TOK_OCT64  */
+    TOK_FLOAT = 267,               /* TOK_FLOAT  */
+    TOK_STRING = 268,              /* TOK_STRING  */
+    TOK_NAME = 269,                /* TOK_NAME  */
+    TOK_EQUALS = 270,              /* TOK_EQUALS  */
+    TOK_NEWLINE = 271,             /* TOK_NEWLINE  */
+    TOK_ARRAY_START = 272,         /* TOK_ARRAY_START  */
+    TOK_ARRAY_END = 273,           /* TOK_ARRAY_END  */
+    TOK_LIST_START = 274,          /* TOK_LIST_START  */
+    TOK_LIST_END = 275,            /* TOK_LIST_END  */
+    TOK_COMMA = 276,               /* TOK_COMMA  */
+    TOK_GROUP_START = 277,         /* TOK_GROUP_START  */
+    TOK_GROUP_END = 278,           /* TOK_GROUP_END  */
+    TOK_SEMICOLON = 279,           /* TOK_SEMICOLON  */
+    TOK_GARBAGE = 280,             /* TOK_GARBAGE  */
+    TOK_ERROR = 281                /* TOK_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -85,36 +89,40 @@ extern int libconfig_yydebug;
 #define TOK_BOOLEAN 258
 #define TOK_INTEGER 259
 #define TOK_HEX 260
-#define TOK_INTEGER64 261
-#define TOK_HEX64 262
-#define TOK_FLOAT 263
-#define TOK_STRING 264
-#define TOK_NAME 265
-#define TOK_EQUALS 266
-#define TOK_NEWLINE 267
-#define TOK_ARRAY_START 268
-#define TOK_ARRAY_END 269
-#define TOK_LIST_START 270
-#define TOK_LIST_END 271
-#define TOK_COMMA 272
-#define TOK_GROUP_START 273
-#define TOK_GROUP_END 274
-#define TOK_SEMICOLON 275
-#define TOK_GARBAGE 276
-#define TOK_ERROR 277
+#define TOK_BIN 261
+#define TOK_OCT 262
+#define TOK_INTEGER64 263
+#define TOK_HEX64 264
+#define TOK_BIN64 265
+#define TOK_OCT64 266
+#define TOK_FLOAT 267
+#define TOK_STRING 268
+#define TOK_NAME 269
+#define TOK_EQUALS 270
+#define TOK_NEWLINE 271
+#define TOK_ARRAY_START 272
+#define TOK_ARRAY_END 273
+#define TOK_LIST_START 274
+#define TOK_LIST_END 275
+#define TOK_COMMA 276
+#define TOK_GROUP_START 277
+#define TOK_GROUP_END 278
+#define TOK_SEMICOLON 279
+#define TOK_GARBAGE 280
+#define TOK_ERROR 281
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 78 "grammar.y"
+#line 77 "grammar.y"
 
   int ival;
   long long llval;
   double fval;
   char *sval;
 
-#line 118 "grammar.h"
+#line 126 "grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -124,12 +132,6 @@ typedef union YYSTYPE YYSTYPE;
 
 
 
-#if !defined libconfig_yyerror && !defined YYERROR_IS_DECLARED
-void libconfig_yyerror (void *scanner, struct parse_context *ctx, struct scan_context *scan_ctx, const char *msg);
-#endif
-#if !defined libconfig_yylex && !defined YYLEX_IS_DECLARED
-int libconfig_yylex (YYSTYPE *yylvalp, void *scanner);
-#endif
 
 int libconfig_yyparse (void *scanner, struct parse_context *ctx, struct scan_context *scan_ctx);
 

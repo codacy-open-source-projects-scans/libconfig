@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -29,8 +29,9 @@
 #include "wincompat.h"
 #include "libconfig.h"
 
-#include <cstring>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <sstream>
 
 namespace libconfig {
@@ -412,6 +413,10 @@ void Config::setDefaultFormat(Setting::Format format)
 {
   if(format == Setting::FormatHex)
     _defaultFormat = Setting::FormatHex;
+  else if(format == Setting::FormatBin)
+    _defaultFormat = Setting::FormatBin;
+  else if (format == Setting::FormatOct)
+    _defaultFormat = Setting::FormatOct;
   else
     _defaultFormat = Setting::FormatDefault;
 
@@ -682,6 +687,14 @@ Setting::Setting(config_setting_t *setting)
       _format = FormatHex;
       break;
 
+    case CONFIG_FORMAT_BIN:
+      _format = FormatBin;
+      break;
+
+    case CONFIG_FORMAT_OCT:
+      _format = FormatOct;
+      break;
+
     case CONFIG_FORMAT_DEFAULT:
     default:
       _format = FormatDefault;
@@ -704,6 +717,10 @@ void Setting::setFormat(Format format)
   {
     if(format == FormatHex)
       _format = FormatHex;
+    else if(format == FormatBin)
+      _format = FormatBin;
+    else if(format == FormatOct)
+      _format = FormatOct;
     else
       _format = FormatDefault;
   }
@@ -729,7 +746,7 @@ Setting::operator int() const
   if(_type == TypeInt64)
   {
     long long val = config_setting_get_int64(_setting);
-    if((val < INT_MIN) || (val > INT_MAX))
+    if((val < INT32_MIN) || (val > INT32_MAX))
       throw SettingRangeException(*this);
 
     return((int)val);
@@ -747,7 +764,7 @@ Setting::operator unsigned int() const
   if(_type == TypeInt64)
   {
     long long val = config_setting_get_int64(_setting);
-    if((val < 0) || (val > UINT_MAX))
+    if((val < 0) || (val > UINT32_MAX))
       throw SettingRangeException(*this);
 
     return(static_cast<unsigned int>(val));

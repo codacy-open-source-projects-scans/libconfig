@@ -1,5 +1,3 @@
-## About
-
 *Libconfig* is a simple library for processing structured configuration 
 files, like [this one](test.cfg.txt). This file format is more compact 
 and more readable than XML. And unlike XML, it is type-aware, so it is 
@@ -37,5 +35,5 @@ MinGW environment or with Visual Studio 2008 or later using the provided
 solution file.
 
 <center>
-<a href="dist/libconfig-1.7.3.tar.gz"><b>libconfig-1.7.3.tar.gz</b></a>
+<a href="dist/libconfig-1.8.1.tar.gz"><b>libconfig-1.8.1.tar.gz</b></a>
 </center>

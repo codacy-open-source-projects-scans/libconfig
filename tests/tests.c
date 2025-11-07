@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -598,7 +598,7 @@ TT_TEST(SettingLookups)
 
   ok = config_lookup_string(&cfg, "foo.[0].[1]", &str);
   TT_ASSERT_FALSE(ok);
-  
+
   ok = config_lookup_string(&cfg, "foo.[0].array.[0].blah", &str);
   TT_ASSERT_FALSE(ok);
 
@@ -610,7 +610,7 @@ TT_TEST(SettingLookups)
 
   setting = config_lookup(&cfg, "foo.[0].array.[0");
   TT_ASSERT_PTR_NULL(setting);
-  
+
   setting = config_lookup(&cfg, "/foo.[0].array.[0]");
   TT_ASSERT_PTR_NOTNULL(setting);
 
@@ -622,7 +622,7 @@ TT_TEST(SettingLookups)
 
   setting = config_setting_lookup(parent, ".[0]");
   TT_ASSERT_PTR_NOTNULL(setting);
-  
+
   setting = config_setting_lookup(parent, ".[0].array");
   TT_ASSERT_PTR_NOTNULL(setting);
 
@@ -634,6 +634,12 @@ TT_TEST(SettingLookups)
 
   setting = config_setting_lookup(parent, "[0].array.[0].blah");
   TT_ASSERT_PTR_NULL(setting);
+
+  TT_ASSERT_PTR_NOTNULL(config_lookup(&cfg, "foo.[3].nested"));
+  TT_ASSERT_PTR_NOTNULL(config_lookup(&cfg, "foo.[3].nested.deeper"));
+  TT_ASSERT_PTR_NOTNULL(config_lookup(&cfg, "foo.[3].nested.deeper.color"));
+
+  config_destroy(&cfg);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -653,13 +659,91 @@ TT_TEST(ReadStream)
   ok = config_read(&cfg, stream);
 
   fclose(stream);
-  
+
   if(!ok)
   {
     printf("error: %s:%d\n", config_error_text(&cfg),
            config_error_line(&cfg));
   }
   TT_ASSERT_TRUE(ok);
+
+  config_destroy(&cfg);
+}
+
+/* ------------------------------------------------------------------------- */
+
+TT_TEST(BinaryAndHex)
+{
+  const char *buf;
+  config_t cfg;
+  int rc;
+  int ival;
+  long long llval;
+
+  config_init(&cfg);
+
+  buf = "somebin=0b1010101;\n"
+        "somehex=0xbeef;\n"
+        "negativehex=0xaabbccdd;\n"
+        "someautobighex=0x100000000;\n"
+        "someautobigbin=0b111111111111111111111111111111111;" // 33 bits
+        "largestintbin=0b11111111111111111111111111111111;" // 32 bits
+        "somebighex=0x100000000L;\n"
+        "somebigbin=0b111111111111111111111111111111111L;"
+        "somebigoctal=0o7777777777777;"
+    ;
+
+  rc = config_read_string(&cfg, buf);
+  TT_ASSERT_TRUE(rc);
+
+  rc = config_lookup_int(&cfg, "somebin", &ival);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT_EQ(ival, 85);
+
+  rc = config_lookup_int(&cfg, "somehex", &ival);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT_EQ(ival, 48879);
+
+  rc = config_lookup_int64(&cfg, "someautobighex", &llval);
+  TT_ASSERT_TRUE(rc);
+  printf("some auto big hex: %lld\n", llval);
+  TT_ASSERT_INT64_EQ(llval, 0x100000000LL);
+
+  rc = config_lookup_int64(&cfg, "someautobigbin", &llval);
+  printf("some auto big bin: %lld\n", llval);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT64_EQ(llval, 0x1ffffffffLL);
+
+  rc = config_lookup_int(&cfg, "someautobigbin", &ival);
+  TT_ASSERT_FALSE(rc);
+
+  rc = config_lookup_int64(&cfg, "somebighex", &llval);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT64_EQ(llval, 0x100000000LL);
+
+  rc = config_lookup_int64(&cfg, "somebigbin", &llval);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT64_EQ(llval, 0x1ffffffffLL);
+
+  rc = config_lookup_int(&cfg, "largestintbin", &ival);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT_EQ(ival, -1);
+
+  rc = config_lookup_int(&cfg, "somebigoctal", &ival);
+  TT_ASSERT_FALSE(rc);
+
+  rc = config_lookup_int64(&cfg, "somebigoctal", &llval);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT64_EQ(llval, 549755813887LL);
+
+  rc = config_lookup_int(&cfg, "negativehex", &ival);
+  printf("negativehex: %d\n", ival);
+  TT_ASSERT_TRUE(rc);
+  TT_ASSERT_INT_EQ(ival, -1430532899);
+
+  parse_and_compare("./testdata/binhex.cfg", "./testdata/binhex.cfg");
+
+  config_destroy(&cfg);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -684,11 +768,12 @@ int main(int argc, char **argv)
   TT_SUITE_TEST(LibConfigTests, OverrideSetting);
   TT_SUITE_TEST(LibConfigTests, SettingLookups);
   TT_SUITE_TEST(LibConfigTests, ReadStream);
+  TT_SUITE_TEST(LibConfigTests, BinaryAndHex);
   TT_SUITE_RUN(LibConfigTests);
   failures = TT_SUITE_NUM_FAILURES(LibConfigTests);
   TT_SUITE_END(LibConfigTests);
 
-  if (failures)
+  if(failures)
     return EXIT_FAILURE;
 
   return EXIT_SUCCESS;

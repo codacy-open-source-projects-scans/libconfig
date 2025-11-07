@@ -1,7 +1,7 @@
 /* -*- mode: C -*- */
 /* --------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -51,7 +51,7 @@
 #include "wincompat.h"
 #include "util.h"
 
-#define YY_NO_INPUT // Suppress generation of useless input() function
+#define YY_NO_INPUT /* Suppress generation of useless input() function */
 
 %}
 
@@ -60,8 +60,9 @@ false             [Ff][Aa][Ll][Ss][Ee]
 name              [A-Za-z\*][-A-Za-z0-9_\*]*
 integer           [-+]?[0-9]+
 integer64         [-+]?[0-9]+L(L)?
-hex               0[Xx][0-9A-Fa-f]+
-hex64             0[Xx][0-9A-Fa-f]+L(L)?
+bin               0[bB]([01]){1,64}(L(L)?)?
+oct               0[oOqQ]([0-7]){1,21}(L(L)?)?
+hex               0[Xx]([0-9A-Fa-f]){1,16}(L(L)?)?
 hexchar           \\[Xx][0-9A-Fa-f]{2}
 float             ([-+]?([0-9]*)?\.[0-9]*([eE][-+]?[0-9]+)?)|([-+]?([0-9]+)(\.[0-9]*)?[eE][-+]?[0-9]+)
 include_open ^[ \t]*@include[ \t]+\"
@@ -140,12 +141,13 @@ include_open ^[ \t]*@include[ \t]+\"
 {name}            { yylval->sval = yytext; return(TOK_NAME); }
 {float}           { yylval->fval = atof(yytext); return(TOK_FLOAT); }
 {integer}         {
-                    int ok;
-                    long long llval = libconfig_parse_integer(yytext, &ok);
-                    if(!ok)
+                    long long llval;
+                    int is_long;
+
+                    if(!libconfig_parse_integer(yytext, 10, &llval, &is_long))
                       return(TOK_ERROR);
 
-                    if((llval < INT_MIN) || (llval > INT_MAX))
+                    if(is_long)
                     {
                       yylval->llval = llval;
                       return(TOK_INTEGER64);
@@ -156,14 +158,69 @@ include_open ^[ \t]*@include[ \t]+\"
                       return(TOK_INTEGER);
                     }
                   }
-{integer64}       { yylval->llval = atoll(yytext); return(TOK_INTEGER64); }
-{hex}             {
-                    yylval->ival = strtoul(yytext, NULL, 16);
-                    return(TOK_HEX);
+{integer64}       {
+                    int is_long;
+
+                    if(!libconfig_parse_integer(yytext, 10, &(yylval->llval),
+                                                &is_long))
+                      return(TOK_ERROR);
+
+                    return(TOK_INTEGER64);
                   }
-{hex64}           {
-                    yylval->llval = libconfig_parse_hex64(yytext);
-                    return(TOK_HEX64);
+{bin}             {
+                    long long llval;
+                    int is_long;
+
+                    if(!libconfig_parse_integer(yytext + 2, 2, &llval, &is_long))
+                      return(TOK_ERROR);
+
+                    if(is_long)
+                    {
+                      yylval->llval = llval;
+                      return(TOK_BIN64);
+                    }
+                    else
+                    {
+                      yylval->ival = (int)llval;
+                      return(TOK_BIN);
+                    }
+                  }
+{oct}             {
+                    long long llval;
+                    int is_long;
+
+                    if(!libconfig_parse_integer(yytext + 2, 8, &llval, &is_long))
+                      return(TOK_ERROR);
+
+                    if(is_long)
+                    {
+                      yylval->llval = llval;
+                      return(TOK_OCT64);
+                    }
+                    else
+                    {
+                      yylval->ival = (int)llval;
+                      return(TOK_OCT);
+                    }
+                  }
+{hex}             {
+                    long long llval;
+                    int is_long;
+
+                    if(!libconfig_parse_integer(yytext + 2, 16, &llval,
+                                                &is_long))
+                      return(TOK_ERROR);
+
+                    if(is_long)
+                    {
+                      yylval->llval = llval;
+                      return(TOK_HEX64);
+                    }
+                    else
+                    {
+                      yylval->ival = (int)llval;
+                      return(TOK_HEX);
+                    }
                   }
 \[                { return(TOK_ARRAY_START); }
 \]                { return(TOK_ARRAY_END); }

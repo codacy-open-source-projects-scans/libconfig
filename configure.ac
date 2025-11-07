@@ -1,7 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([libconfig],[1.7.4],[hyperrealm@gmail.com],[libconfig],
-        [https://hyperrealm.github.io/libconfig/])
+AC_INIT([libconfig],[1.8.1],[hyperrealm@gmail.com],[libconfig],[https://hyperrealm.github.io/libconfig/])
 AC_CONFIG_AUX_DIR([aux-build])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
@@ -49,8 +48,6 @@ fi
 
 AC_MSG_CHECKING([for compiler switch to enable full C/C++ warnings]);
 
-dnl Checks for libraries
-
 dnl Enable warnings, if we can determine an appropriate switch...
 case "${CC}" in
 
@@ -85,6 +82,18 @@ dnl Checks for functions
 AC_CHECK_FUNCS([newlocale uselocale freelocale])
 
 dnl Package options
+
+doasserts=no
+
+AC_ARG_ENABLE(asserts,
+AS_HELP_STRING([--enable-asserts], [Enable null pointer asserts]),
+[if test "$enableval" = "yes"; then doasserts="yes"; fi],
+[
+doasserts=no
+]
+)
+
+AM_CONDITIONAL(ENABLE_ASSERTS, test x$doasserts = xyes)
 
 docxx=yes
 
@@ -143,7 +152,6 @@ esac
 
 AM_CONDITIONAL(GNU_WIN, test x$gnuwin = xyes)
 
-dnl Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
 	lib/Makefile

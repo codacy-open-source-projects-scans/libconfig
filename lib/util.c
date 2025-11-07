@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -94,59 +94,39 @@ void *libconfig_realloc(void *ptr, size_t size)
 
 /* ------------------------------------------------------------------------- */
 
-long long libconfig_parse_integer(const char *s, int *ok)
+/* Returns 1 on success, 0 on failure. Sets is_long to 1 if value is a
+   64-bit int, otherwise to 0.
+*/
+
+int libconfig_parse_integer(const char *s, int base, long long *val,
+                            int *is_long)
 {
-  long long llval;
   char *endptr;
   int errsave = errno;
+
   errno = 0;
-  llval = strtoll(s, &endptr, 0);	/* base 10 or base 8 */
+  *val = strtoll(s, &endptr, base);
+
+  if((base != 10) && (*val > INT32_MAX) && (*val <= UINT32_MAX))
+    *val = (long long)(int)*val;
+
+  *is_long = ((*val < INT32_MIN) || (*val > INT32_MAX));
+
+  /* Check for trailing L's. */
+  while(!errno && *endptr == 'L')
+  {
+    *is_long = 1;
+    ++endptr;
+  }
+
   if(*endptr || errno)
   {
-    errno = 0;
-    *ok = 0;
-    return(0);	/* parse error */
+    errno = errsave;
+    return(0);  /* parse error */
   }
   errno = errsave;
 
-  *ok = 1;
-  return(llval);
-}
-
-/* ------------------------------------------------------------------------- */
-
-unsigned long long libconfig_parse_hex64(const char *s)
-{
-#ifdef __MINGW32__
-
-  /* MinGW's strtoull() seems to be broken; it only returns the lower
-   * 32 bits...
-   */
-
-  const char *p = s;
-  unsigned long long val = 0;
-
-  if(*p != '0')
-    return(0);
-
-  ++p;
-
-  if(*p != 'x' && *p != 'X')
-    return(0);
-
-  for(++p; isxdigit(*p); ++p)
-  {
-    val <<= 4;
-    val |= ((*p < 'A') ? (*p & 0xF) : (9 + (*p & 0x7)));
-  }
-
-  return(val);
-
-#else /* ! __MINGW32__ */
-
-  return(strtoull(s, NULL, 16));
-
-#endif /* __MINGW32__ */
+  return(1);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -181,6 +161,30 @@ void libconfig_format_double(double val, int precision, int sci_ok, char *buf,
         break;
     }
   }
+}
+
+/* ------------------------------------------------------------------------- */
+
+/* buf must be at least 65 bytes. Return value is pointer to most significant
+   nonzero bit, or pointer to the least significant zero bit if value is 0. */
+
+char *libconfig_format_bin(int64_t val, char *buf)
+{
+  static const int num_bits = sizeof(val) * BITS_IN_BYTE;
+  char *p = buf + num_bits;
+  char *first_bit = NULL;
+
+  *p = '\0';
+
+  for(int i = 0; i < num_bits; ++i)
+  {
+    int x = val & 1;
+    val >>= 1;
+    *(--p) = '0' + x;
+    if(!first_bit || x) first_bit = p;
+  }
+
+  return(first_bit);
 }
 
 /* ------------------------------------------------------------------------- */

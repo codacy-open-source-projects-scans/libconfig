@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2023  Mark A Lindner
+   Copyright (C) 2005-2025  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -27,7 +27,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) \
+  || defined(_WIN64) || defined(__WIN64__) || defined(WIN64)
 #if defined(LIBCONFIG_STATIC)
 #define LIBCONFIG_API
 #elif defined(LIBCONFIG_EXPORTS)
@@ -35,13 +36,13 @@ extern "C" {
 #else /* ! LIBCONFIG_EXPORTS */
 #define LIBCONFIG_API __declspec(dllimport)
 #endif /* LIBCONFIG_STATIC */
-#else /* ! WIN32 */
+#else /* ! WIN32/64 */
 #define LIBCONFIG_API
-#endif /* WIN32 */
+#endif /* WIN32/64 */
 
 #define LIBCONFIG_VER_MAJOR    1
-#define LIBCONFIG_VER_MINOR    7
-#define LIBCONFIG_VER_REVISION 4
+#define LIBCONFIG_VER_MINOR    8
+#define LIBCONFIG_VER_REVISION 1
 
 #include <stdio.h>
 
@@ -57,6 +58,8 @@ extern "C" {
 
 #define CONFIG_FORMAT_DEFAULT  0
 #define CONFIG_FORMAT_HEX      1
+#define CONFIG_FORMAT_BIN      2
+#define CONFIG_FORMAT_OCT      3
 
 #define CONFIG_OPTION_AUTOCONVERT                     0x01
 #define CONFIG_OPTION_SEMICOLON_SEPARATORS            0x02
@@ -188,6 +191,17 @@ extern LIBCONFIG_API int config_setting_get_bool(
   const config_setting_t *setting);
 extern LIBCONFIG_API const char *config_setting_get_string(
   const config_setting_t *setting);
+
+extern LIBCONFIG_API int config_setting_get_int_safe(
+  const config_setting_t *setting, int *value);
+extern LIBCONFIG_API int config_setting_get_int64_safe(
+  const config_setting_t *setting, long long *value);
+extern LIBCONFIG_API int config_setting_get_float_safe(
+  const config_setting_t *setting, double *value);
+extern LIBCONFIG_API int config_setting_get_bool_safe(
+  const config_setting_t *setting, int *value);
+extern LIBCONFIG_API int config_setting_get_string_safe(
+  const config_setting_t *setting, const char **value);
 
 extern LIBCONFIG_API int config_setting_lookup_int(
   const config_setting_t *setting, const char *name, int *value);
